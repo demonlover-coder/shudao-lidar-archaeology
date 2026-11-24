@@ -16,7 +16,7 @@ authors:
 version: 1.0.0
 date-released: 2026-11-24
 license: MIT
-repository-code: "https://github.com/<USERNAME>/shudao-lidar-archaeology"
+repository-code: "https://github.com/demonlover-coder/shudao-lidar-archaeology"
 keywords:
   - airborne LiDAR
   - archaeological prospection
