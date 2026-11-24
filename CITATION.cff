@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the manuscript below and this repository."
+title: "Terrain-prior weakly supervised extraction of ancient mountain roads under closed canopy"
+abstract: >-
+  Dual-branch weakly supervised pipeline for extracting ancient mountain roads
+  from airborne LiDAR under closed canopy: macro path finding with a
+  directional-cosine terrain penalty, weakly supervised corridor segmentation,
+  road-preserving ground filtering and adaptive-resolution DEM generation.
+authors:
+  - family-names: Liu
+    given-names: Jiahao
+    affiliation: "School of Remote Sensing and Information Engineering, Wuhan University, Wuhan 430079, China"
+  - family-names: Wang
+    given-names: Shunli
+    affiliation: "School of Remote Sensing and Information Engineering, Wuhan University, Wuhan 430079, China"
+version: 1.0.0
+date-released: 2026-11-24
+license: MIT
+repository-code: "https://github.com/<USERNAME>/shudao-lidar-archaeology"
+keywords:
+  - airborne LiDAR
+  - archaeological prospection
+  - weakly supervised segmentation
+  - terrain prior
+  - ground filtering
+  - Shu Road
+type: software

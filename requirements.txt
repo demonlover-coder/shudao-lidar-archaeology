@@ -1,0 +1,14 @@
+# Python >= 3.10 (developed on 3.14)
+numpy>=1.26
+scipy>=1.11
+scikit-image>=0.22
+scikit-learn>=1.3
+matplotlib>=3.8
+Pillow>=10.0
+tifffile>=2023.7.10
+rasterio>=1.3
+laspy[lazrs]>=2.5
+torch>=2.2          # CPU is sufficient; a CUDA build is much faster
+torchvision>=0.17   # only for the U-Net / DeepLabV3+ comparison experiments
+# optional: real Cloth Simulation Filter baseline (paper Table 7)
+cloth-simulation-filter>=1.1.7

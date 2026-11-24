@@ -1,0 +1,32 @@
+# Data are not distributed with this repository.
+# Place them under ./data (or point SHUDAO_DATA_ROOT elsewhere).
+data/*
+!data/README.md
+
+# Run-time outputs
+results/
+figures/
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / editors
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Never commit point clouds or large rasters
+*.las
+*.laz
+*.tif
+*.tiff
+*.npy
+*.npz
