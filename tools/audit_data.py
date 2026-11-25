@@ -26,7 +26,7 @@ _DATA_ROOT = os.environ.get(
     "SHUDAO_DATA_ROOT",
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"),
 )
-BASE = os.path.join(_DATA_ROOT, "长安大学采集-shp")
+BASE = os.path.join(_DATA_ROOT, "survey-shp")
 OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results")
 
 GEO_KEYS = {

@@ -61,8 +61,8 @@ REAL = os.path.join(PCL_ROOT, "data_real")
 
 # 原始全回波 LAS（**不是** lastreturn / 回波法版本）
 SRC_LAS = {
-    "杨家坝": os.path.join(PCL_ROOT, "长安大学采集-shp", "杨家坝", "yangjiaba.las"),
-    "西坝村": os.path.join(PCL_ROOT, "长安大学采集-shp", "西坝村", "西坝村栈道-lidar.las"),
+    "杨家坝": os.path.join(PCL_ROOT, "survey-shp", "杨家坝", "yangjiaba.las"),
+    "西坝村": os.path.join(PCL_ROOT, "survey-shp", "西坝村", "西坝村栈道-lidar.las"),
 }
 LABEL = {s: os.path.join(REAL, f"{s}_label.npy") for s in SRC_LAS}
 MASK = {s: os.path.join(RES, f"mask_1m_{s}.npy") for s in SRC_LAS}

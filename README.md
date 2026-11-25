@@ -41,13 +41,13 @@ Developed and tested with Python 3.14, NumPy 2.4, SciPy 1.18, scikit-image 0.26,
 
 ## Data (not included)
 
-The airborne LiDAR point clouds were collected and are owned by **Chang'an University** and are not redistributable. Every script resolves its inputs from a single root, configurable with the environment variable `SHUDAO_DATA_ROOT` (default: `./data`):
+The airborne LiDAR point clouds and the original 5–10 cm DEMs are **not** included and are not redistributable. The reference corridors (SHP) were digitised from historical records and archaeological expert knowledge; they are used for scoring only and are not distributed either. Every script resolves its inputs from a single root, configurable with the environment variable `SHUDAO_DATA_ROOT` (default: `./data`):
 
 ```
 $SHUDAO_DATA_ROOT/
-├── 长安大学采集-shp/
+├── survey-shp/
 │   ├── 杨家坝/
-│   │   ├── yangjiaba.las                  # full-waveform returns
+│   │   ├── yangjiaba.las                  # multi-return LiDAR
 │   │   ├── 杨家河坝碥道-dem.tif           # original 5 cm DEM (EPSG:32648)
 │   │   ├── 杨家坝_蜀道_中轴线.shp         # reference axis (scoring only)
 │   │   └── 杨家坝_蜀道_本体范围.shp       # reference corridor polygon (scoring only)
@@ -60,7 +60,7 @@ $SHUDAO_DATA_ROOT/
 
 All terrain attributes are computed on a **1 m grid using the minimum elevation per cell** (`dem_min`), which already suppresses residual vegetation without any prior filtering.
 
-Derived products (probability maps, delivered point indices, adaptive DEM) can be obtained from the corresponding author on reasonable request, subject to the data provider's permission.
+Derived products (probability maps, delivered point indices, adaptive DEM) can be obtained from the corresponding author on reasonable request.
 
 ## Key parameters
 
@@ -114,7 +114,7 @@ distributed).
 
 * All scripts are runnable from the repository root; each inserts `tools/` on `sys.path` so that sibling modules import cleanly.
 * Figures are regenerated into `figures/`; no bitmap data are shipped.
-* Data availability statement of the paper: code open (MIT), raw point clouds and reference corridors restricted by the data provider.
+* Data availability statement of the paper: code open (MIT); raw point clouds and derived grids not distributed; reference corridors digitised from historical records and archaeological expert knowledge, used for scoring only.
 
 ## License
 

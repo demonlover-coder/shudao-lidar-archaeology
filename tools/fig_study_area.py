@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """图 2 研究区位置图：两处测区的山体阴影与真实相对位置。
 
-输入为长安大学提供的 1 m 分析栅格（data/p2_*_final.tif，EPSG:32648）。
+输入为点云派生的 1 m 分析栅格（data/p2_*_final.tif，EPSG:32648）。
 左两幅为测区 hillshade + 比例尺 + 指北针；右幅为两测区在同一投影下的
 真实相对位置（只给几何关系，不叠加未经核实的地形底图）。
 """
@@ -25,10 +25,10 @@ OUT = ROOT / "figures" / "fig2_study_area.png"
 
 SITES = [
     dict(name="杨家坝", tif=ROOT / "data" / "p2_杨家坝_final.tif",
-         orig=DATA_ROOT / "长安大学采集-shp" / "杨家坝" / "杨家河坝碥道-dem.tif",
+         orig=DATA_ROOT / "survey-shp" / "杨家坝" / "杨家河坝碥道-dem.tif",
          mask=ROOT / "results" / "mask_1m_杨家坝.npy", label="(a)"),
     dict(name="西坝村", tif=ROOT / "data" / "p2_西坝村_final.tif",
-         orig=DATA_ROOT / "长安大学采集-shp" / "西坝村" / "西坝村栈道-dem.tif",
+         orig=DATA_ROOT / "survey-shp" / "西坝村" / "西坝村栈道-dem.tif",
          mask=ROOT / "results" / "mask_1m_西坝村.npy", label="(b)"),
 ]
 
@@ -181,7 +181,7 @@ add_north(axc, x_frac=0.86, y_frac=0.95)
 
 fig.text(0.5, 0.012,
          "测区中心：杨家坝 106.9864°E / 33.5351°N；西坝村 107.1006°E / 33.8381°N（WGS84）。"
-         "底图为长安大学点云派生的 1 m 最小高程栅格，(c) 不叠加地形底图。",
+         "底图为点云派生的 1 m 最小高程栅格，(c) 不叠加地形底图。",
          ha="center", fontsize=7.0, color="#333")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)

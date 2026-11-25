@@ -42,7 +42,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "results")
 _DATA_ROOT = os.environ.get("SHUDAO_DATA_ROOT", os.path.join(ROOT, "data"))
 REAL = os.path.join(_DATA_ROOT, "data_real")
-SHP_BASE = os.path.join(_DATA_ROOT, "长安大学采集-shp")
+SHP_BASE = os.path.join(_DATA_ROOT, "survey-shp")
 
 SHP_NEW = {
     "杨家坝": {"line": r"杨家坝\杨家坝_蜀道_中轴线.shp",

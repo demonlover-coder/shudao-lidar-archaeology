@@ -304,7 +304,7 @@ def build(args) -> dict:
         },
         "step5_task": {            "main": "碥道走廊分割（像素级二分类）",
             "aux": "走廊内路面高程回归（辅助头，共享骨干）",
-            "label_source": "长安大学 SHP 面要素栅格化为走廊 mask（无需新增标注；当前只用杨家坝 + 西坝村）",
+            "label_source": "参考走廊面要素（依历史文献与考古专家知识标注）栅格化为走廊 mask（仅用于评分；当前只用杨家坝 + 西坝村）",
             "input": "1 m 网格多通道：DEM 四通道(mean/min/max/std)、DOM 降采样、坡度/坡向/曲率、有效 mask",
             "output": "走廊概率 [0,1] + 走廊内路面高程",
             "loss": "分割头 BCE + Dice；回归头 masked L1（仅走廊内像素计入）",

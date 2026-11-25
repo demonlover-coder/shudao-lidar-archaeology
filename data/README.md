@@ -2,12 +2,14 @@
 
 Raw and derived data are **not** part of this repository.
 
-* Airborne LiDAR point clouds (`*.las`), the original 5–10 cm DEMs and the
-  reference corridors (SHP) were collected and are owned by **Chang'an
-  University**. They are not redistributable.
+* Airborne LiDAR point clouds (`*.las`) and the original 5–10 cm DEMs are not
+  included and are not redistributable.
+* Reference corridors (SHP) were digitised from historical records and
+  archaeological expert knowledge; they are used for scoring only and are not
+  distributed either.
 * Derived products (1 m `dem_min` grids, probability maps, delivered point
   indices, adaptive-resolution DEM) can be obtained from the corresponding
-  author on reasonable request, subject to the provider's permission.
+  author on reasonable request.
 
 To run the code, either:
 
@@ -17,7 +19,7 @@ To run the code, either:
 
 ```
 <DATA_ROOT>/
-├── 长安大学采集-shp/
+├── survey-shp/
 │   ├── 杨家坝/{yangjiaba.las, 杨家河坝碥道-dem.tif,
 │   │            杨家坝_蜀道_中轴线.shp, 杨家坝_蜀道_本体范围.shp}
 │   └── 西坝村/{西坝村栈道-lidar.las, 西坝村栈道-dem.tif,
