@@ -282,6 +282,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--site", default="杨家坝")
     ap.add_argument("--no-points", action="store_true", help="只做栅格口径，不读 LAS")
+    ap.add_argument("--npz", default="", help="概率图 npz（默认 cold_start_{site}_ep.npz）")
+    ap.add_argument("--out", default="eval_new_shp", help="输出 JSON 前缀")
     a = ap.parse_args()
     site = a.site
     LOG = os.path.join(RES, "eval_new_shp.log")
@@ -323,7 +325,7 @@ def main() -> int:
 
     # ---- 栅格口径：被评对象（有什么评什么）
     pix_pred, prob = {}, None
-    zc_path = os.path.join(RES, f"cold_start_{site}_ep.npz")
+    zc_path = os.path.join(RES, a.npz or f"cold_start_{site}_ep.npz")
     if os.path.exists(zc_path):
         zc = np.load(zc_path)
         prob = (np.where(zc["valid"] == 1, zc["prob"], 0.0)
@@ -401,7 +403,7 @@ def main() -> int:
                 f"{result['dplus_to_centerline_m']['frac_le2m']:.2%}，≤5 m "
                 f"{result['dplus_to_centerline_m']['frac_le5m']:.2%}", LOG)
 
-    out = os.path.join(RES, f"eval_new_shp_{site}.json")
+    out = os.path.join(RES, f"{a.out}_{site}.json")
     json.dump(result, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     log(f"\n  写出 {os.path.relpath(out, ROOT)}", LOG)
     return 0

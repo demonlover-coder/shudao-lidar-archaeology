@@ -1,122 +1,146 @@
 # -*- coding: utf-8 -*-
-"""图 1 工作流示意图：支路 A（宏观寻路，地形物理约束）+ 支路 B（微观弱监督 CNN）。
-
-输出：figures/workflow.png（300 dpi，投稿用）
-
-用法：
-    python tools/fig_workflow.py
-"""
-from __future__ import annotations
-
-import os
-
+"""图 1 工作流（竖版）：输入 → 支路 A → 支路 B → 交付与产品，底部参考与评价。"""
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from matplotlib.patches import FancyBboxPatch, Polygon
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIG = os.path.join(ROOT, "figures")
+plt.rcParams["font.family"] = "Microsoft YaHei"
+plt.rcParams["axes.unicode_minus"] = False
 
-matplotlib.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
-matplotlib.rcParams["axes.unicode_minus"] = False
+BLUE = "#2E6DB4"
+DBLUE = "#1F4E79"
+LBLUE = "#BDD7EE"
+YELLOW = "#FFC000"
+GREEN = "#548235"
+RED = "#C00000"
+GROUP_FC = "#FDFCE9"
+GROUP_EC = "#A6A6A6"
 
-C_A = "#1f4fd8"      # 支路 A
-C_B = "#e3001b"      # 支路 B
-C_OUT = "#1a7f37"    # 交付
-C_REF = "#6b6b6b"    # 参考（仅评分）
-C_BG_A = "#eef2fd"
-C_BG_B = "#fdeef0"
-C_BG_OUT = "#eef7f0"
-
-
-def box(ax, x, y, w, h, fc, ec, lw=1.4, ls="-"):
-    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.35,rounding_size=0.8",
-                                fc=fc, ec=ec, lw=lw, ls=ls, zorder=2))
-
-
-def arrow(ax, p0, p1, color, lw=2.0, ls="-", rad=0.0):
-    ax.add_patch(FancyArrowPatch(p0, p1, arrowstyle="-|>", mutation_scale=13,
-                                 color=color, lw=lw, ls=ls, zorder=3,
-                                 connectionstyle=f"arc3,rad={rad}"))
+fig, ax = plt.subplots(figsize=(6.3, 9.45), dpi=600)
+ax.set_xlim(0, 100)
+ax.set_ylim(0, 150)
+ax.axis("off")
+fig.subplots_adjust(left=0.004, right=0.996, top=0.998, bottom=0.002)
 
 
-def main():
-    os.makedirs(FIG, exist_ok=True)
-    fig, ax = plt.subplots(figsize=(11.2, 6.5))
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 62)
-    ax.axis("off")
-
-    # ── 支路 A ──────────────────────────────────────────────
-    box(ax, 2, 34, 45, 26, C_BG_A, C_A)
-    ax.text(24.5, 57.4, "支路 A：宏观寻路（地形物理约束）", ha="center", va="center",
-            fontsize=11, color=C_A, weight="bold")
-    for txt, y in ((r"机载 LiDAR → 1 m DEM（$dem_{min}$）", 52.5),
-                   (r"openness 代价面 $c$", 47.0),
-                   (r"方向余弦惩罚 $\lambda_c\cdot pen$，$\lambda_c=6$", 42.5),
-                   ("状态增广 Dijkstra（端点由实地给定）", 37.6)):
-        ax.text(24.5, y, txt, ha="center", va="center", fontsize=9.2)
-    for y in (54.6, 49.2, 44.6, 40.36):
-        arrow(ax, (24.5, y + 0.35), (24.5, y - 0.45), C_A, lw=1.2)
-    ax.text(24.5, 35.5, "→ 宏观路径（循等高线）", ha="center", va="center",
-            fontsize=9.2, color=C_A, weight="bold")
-
-    # ── 支路 B ──────────────────────────────────────────────
-    box(ax, 53, 34, 45, 26, C_BG_B, C_B)
-    ax.text(75.5, 57.4, "支路 B：微观弱监督分割（1.5k CNN）", ha="center", va="center",
-            fontsize=11, color=C_B, weight="bold")
-    for txt, y in (("4 通道：Hillshade / CSSC / 距离场 / openness", 52.5),
-                   ("96×96 patch，BCE + 正样本加权，Adam", 47.0),
-                   ("整图滑窗推理 → 概率图 $P$", 41.5),
-                   ("$P\\geq 0.5$ → 骨架轴线", 37.0)):
-        ax.text(75.5, y, txt, ha="center", va="center", fontsize=9.2)
-    for y in (54.6, 49.2, 43.8, 39.2):
-        arrow(ax, (75.5, y + 0.35), (75.5, y - 0.45), C_B, lw=1.2)
-
-    # ── 支路 A → B 的物理先验传递 ───────────────────────────
-    arrow(ax, (47.4, 47.0), (52.6, 47.0), "#111111", lw=2.6)
-    ax.text(50.0, 50.8, "物理先验", ha="center", va="center", fontsize=9.5, weight="bold",
-            bbox=dict(fc="white", ec="none", pad=1.6), zorder=4)
-    ax.text(50.0, 43.2, "伪标签\n+ 距离场", ha="center", va="center", fontsize=8.2,
-            color="#333333", linespacing=1.25,
-            bbox=dict(fc="white", ec="none", pad=1.4), zorder=4)
-
-    # ── 交付与产品 ──────────────────────────────────────────
-    box(ax, 43, 20, 55, 9.5, C_BG_OUT, C_OUT)
-    ax.text(70.5, 24.75, r"交付：3D 距轴 $\leq d_3=3.5$ m 且 AGL $\leq 2.0$ m",
-            ha="center", va="center", fontsize=9.8, color=C_OUT, weight="bold")
-    arrow(ax, (75.5, 33.6), (75.5, 29.7), C_OUT)
-
-    box(ax, 2, 20, 35, 9.5, "white", C_OUT, ls="--")
-    ax.text(19.5, 24.75, "走廊引导保路滤波 + 自适应 DEM", ha="center", va="center",
-            fontsize=9.5, color=C_OUT)
-    arrow(ax, (43.0, 23.2), (37.4, 23.2), C_OUT, lw=1.4, ls="--")
-
-    ax.text(24.5, 16.6, "植被去除 >99.9%，路面点保留 91–92%", ha="center", va="center",
-            fontsize=8.4, color="#333333")
-    ax.text(24.5, 13.4, "走廊 0.5 m 子格 DEM（保路槽、剔树冠）", ha="center", va="center",
-            fontsize=8.4, color="#333333")
-
-    # ── 参考走廊只用于评分 ──────────────────────────────────
-    box(ax, 2, 3.0, 42, 7.5, "#fafafa", C_REF, ls="--")
-    ax.text(23.0, 6.75, "参考走廊（SHP）：仅用于最终评分", ha="center", va="center",
-            fontsize=9.5, color=C_REF, weight="bold")
-    ax.text(23.0, 4.6, "不进入特征 / 寻路 / 伪标签 / 训练 / 交付", ha="center", va="center",
-            fontsize=8.2, color=C_REF)
-
-    box(ax, 53, 3.0, 45, 7.5, "white", C_REF, ls="--")
-    ax.text(75.5, 6.75, "评价：公平点级 IoU / 骨架 F1 / 线 IoU", ha="center", va="center",
-            fontsize=9.5, color="#222222", weight="bold")
-    arrow(ax, (44.2, 6.75), (52.6, 6.75), C_REF, lw=1.4, ls="--")
-    arrow(ax, (75.5, 19.6), (75.5, 11.0), C_REF, lw=1.4, ls="--")
-
-    fig.tight_layout()
-    out = os.path.join(FIG, "workflow.png")
-    fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
-    plt.close(fig)
-    print(f"写出 {out}")
+def group(x0, y0, x1, y1, title):
+    ax.add_patch(FancyBboxPatch(
+        (x0, y0), x1 - x0, y1 - y0,
+        boxstyle="round,pad=0,rounding_size=1.2",
+        fc=GROUP_FC, ec=GROUP_EC, lw=1.0, ls=(0, (3, 2)), zorder=1))
+    ax.text((x0 + x1) / 2, y1 - 1.4, title, ha="center", va="top",
+            fontsize=7.6, fontweight="bold", color="#3A3A3A", zorder=4)
 
 
-if __name__ == "__main__":
-    main()
+def mod(x, y, w, h, txt, fc=BLUE, tc="white", fs=6.4):
+    ax.add_patch(FancyBboxPatch(
+        (x, y), w, h, boxstyle="round,pad=0,rounding_size=0.7",
+        fc=fc, ec=DBLUE, lw=0.7, zorder=3))
+    ax.text(x + w / 2, y + h / 2, txt, ha="center", va="center",
+            fontsize=fs, color=tc, fontweight="bold", zorder=4,
+            linespacing=1.25)
+
+
+def slab(x, y, w, h, txt="", fc=LBLUE, fs=6.0, skew=0.9):
+    ax.add_patch(Polygon(
+        [(x + skew, y + h), (x + w + skew, y + h), (x + w, y), (x, y)],
+        closed=True, fc=fc, ec=DBLUE, lw=0.6, zorder=3))
+    if txt:
+        ax.text(x + w / 2 + skew / 2, y + h / 2, txt, ha="center", va="center",
+                fontsize=fs, color="#1F3B57", zorder=4)
+
+
+def arr(x0, y0, x1, y1, dashed=False):
+    ax.annotate("", xy=(x1, y1), xytext=(x0, y0),
+                arrowprops=dict(arrowstyle="-|>,head_width=0.18,head_length=0.45",
+                                color="#404040", lw=0.9, shrinkA=0, shrinkB=0,
+                                ls=(0, (4, 2.5)) if dashed else "-"), zorder=2)
+
+
+# ================= 输入 =================
+group(2, 128, 98, 148, "输入")
+slab(5, 133, 14, 7, "点云 (L1)")
+slab(23, 133, 14, 7, "dem_min 1 m")
+mod(41, 133.5, 11, 6, "CSSC", fs=6.2)
+mod(54, 133.5, 11, 6, "open.", fs=6.2)
+mod(67, 133.5, 14, 6, "hillshade·法向", fs=5.9)
+ax.text(88.5, 136.5, "70 m · 5 m/s\n仿地飞行", ha="center", va="center",
+        fontsize=6.0, color="#555555", linespacing=1.5)
+
+arr(50, 128, 50, 124.6)
+
+# ================= 支路 A =================
+group(2, 92, 98, 124, "支路 A：宏观寻路")
+for i in range(8):
+    slab(8 + i * 6.8, 112, 5.2, 4.6, "", fc=LBLUE if i % 2 else "#DEEBF7",
+         skew=0.5)
+ax.text(66, 114.3, "8 朝向状态图", ha="left", va="center",
+        fontsize=6.2, color="#333333")
+mod(6, 103.5, 37, 5.6, "代价面  c = open-ness + 0.05", fs=6.4)
+mod(45, 103.5, 18, 5.6, "λc·|cos φ|", fc=YELLOW, tc="#3A3A00", fs=6.4)
+mod(65, 103.5, 29, 5.6, "最小代价路径", fs=6.4)
+mod(6, 95.5, 15, 4.8, "端点（实地）", fc=GREEN, fs=6.0)
+slab(24, 95.0, 38, 5.4, "伪标签走廊 + 距离场", fs=6.2)
+
+arr(50, 92, 50, 88.6)
+ax.text(50, 90.3, "伪标签 + 距离场（先验→学习）", ha="center", va="center",
+        fontsize=6.0, color="#404040", zorder=6,
+        bbox=dict(fc="white", ec="none", pad=0.8))
+
+# ================= 支路 B =================
+group(2, 58, 98, 88, "支路 B：弱监督分割（≈1.5 k 参数 CNN）")
+for i, t in enumerate(["hillshade", "CSSC", "距离场", "openness"]):
+    slab(8 + i * 20, 76.5, 15, 5.2, t, fc="#DEEBF7", fs=6.2, skew=0.6)
+mod(8, 68.5, 20, 5.6, "Conv3×3 ×2", fs=6.4)
+mod(30, 68.5, 12, 5.6, "池化", fs=6.4)
+mod(44, 68.5, 15, 5.6, "上采样", fs=6.4)
+ax.text(63, 71.3, "96×96 patch\nBCE + 正样本加权 · Adam", ha="left", va="center",
+        fontsize=5.9, color="#555555", linespacing=1.5)
+mod(8, 60.5, 16, 5.0, "1×1 → P", fs=6.4)
+slab(28, 59.9, 20, 5.4, "概率图 P", fc="#9DC3E6", fs=6.2, skew=0.6)
+mod(52, 60.5, 18, 5.0, "P ≥ 0.5 → 骨架", fc=GREEN, fs=5.6)
+
+arr(50, 58, 50, 54.6)
+
+# ================= 交付与产品 =================
+group(2, 28, 98, 54, "交付与产品")
+mod(6, 38, 25, 7, "交付\nd3 3.5 m · AGL 2.0 m", fs=6.2)
+mod(35, 38, 26, 7, "保路滤波\n内 0.5 m / 外 0.3 m", fs=6.2)
+mod(65, 38, 27, 7, "自适应分辨率 DEM\n0.5 m 子格 + 羽化", fs=6.2)
+arr(31, 41.5, 35, 41.5)
+arr(61, 41.5, 65, 41.5)
+ax.text(50, 32.5, "路面点保留 91–92% · 接缝残差 −9.9% / −6.9%",
+        ha="center", va="center", fontsize=6.0, color="#3A6B2E")
+
+# ================= 参考与评价 =================
+ax.add_patch(FancyBboxPatch((2, 2), 42, 22,
+                            boxstyle="round,pad=0,rounding_size=1.0",
+                            fc="white", ec=GROUP_EC, lw=1.0, ls=(0, (3, 2)),
+                            zorder=1))
+ax.text(23, 22.4, "参考走廊（SHP）", ha="center", va="top",
+        fontsize=7.2, fontweight="bold", color="#3A3A3A", zorder=4)
+slab(6, 12.5, 13, 5.2, "线状参考", fc="#F2F2F2", fs=5.9)
+slab(23, 12.5, 13, 5.2, "评分掩膜", fc="#F2F2F2", fs=5.9)
+ax.text(23, 9.2, "历史文献 + 考古专家知识标注", ha="center", va="center",
+        fontsize=5.9, color="#333333")
+ax.text(23, 5.2, "不进入特征 / 寻路 / 训练 / 交付", ha="center", va="center",
+        fontsize=6.0, color=RED, fontweight="bold")
+
+ax.add_patch(FancyBboxPatch((52, 2), 46, 22,
+                            boxstyle="round,pad=0,rounding_size=1.0",
+                            fc="white", ec=GROUP_EC, lw=1.0, ls=(0, (3, 2)),
+                            zorder=1))
+ax.text(75, 22.4, "评价（独立口径）", ha="center", va="top",
+        fontsize=7.2, fontweight="bold", color="#3A3A3A", zorder=4)
+ax.text(75, 17.0, "公平点级 P / R / IoU\n骨架 F1 · Buffer IoU\n线 IoU / COM / COR（r = 2 m）",
+        ha="center", va="top", fontsize=6.0, color="#333333", linespacing=1.7)
+
+arr(44, 13, 52, 13, dashed=True)
+arr(80, 28, 80, 24, dashed=True)
+ax.text(81, 26, "预测轴线", ha="left", va="center", fontsize=5.9, color="#404040")
+
+fig.savefig(r"D:\点云和3D视觉\蜀道问题\DEM自适应\figures\workflow.png",
+            dpi=600, facecolor="white")
+print("saved")

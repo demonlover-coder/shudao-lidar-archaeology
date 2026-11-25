@@ -289,7 +289,8 @@ def refine_path_soft(op, valid, ep, n_row, n_col, conf, prob, dem, a, log=print)
 
 
 # ================================================================ 第 3 步
-def build_inputs(hs, cssc, valid, dist, cost, in_ch, gate=3.0, log=print, tpi=None):
+def build_inputs(hs, cssc, valid, dist, cost, in_ch, gate=3.0, log=print, tpi=None,
+                 drop=(), cssc_alt=None, cssc_name="CSSC"):
     """模型输入。
 
     `in_ch=2`：只有 Hillshade + CSSC（局部视觉，完全不含任何宏观走向信息）。
@@ -299,14 +300,28 @@ def build_inputs(hs, cssc, valid, dist, cost, in_ch, gate=3.0, log=print, tpi=No
     4ch 才具备"新站点可用"的判别力。
     """
     cmax = float(np.nanmax(cssc[valid]))
-    cssc_n = np.where(valid, np.clip(cssc / max(cmax, 1e-9), 0.0, 1.0), 0.0)
-    chans = [np.where(valid, hs, 0.0), cssc_n]
-    names = ["Hillshade", f"CSSC÷{cmax:.0f}"]
+    if cssc_alt is not None:
+        v = cssc_alt[valid]
+        lo, hi = np.percentile(v, [2.0, 98.0])
+        cssc_n = np.where(valid, np.clip((cssc_alt - lo) / max(hi - lo, 1e-9), 0.0, 1.0), 0.0)
+    else:
+        cssc_n = np.where(valid, np.clip(cssc / max(cmax, 1e-9), 0.0, 1.0), 0.0)
+    chans, names = [], []
+    if "hillshade" not in drop:
+        chans.append(np.where(valid, hs, 0.0))
+        names.append("Hillshade")
+    if "cssc" not in drop:
+        chans.append(cssc_n)
+        names.append(cssc_name)
     if in_ch >= 4:
-        ch0 = np.where(valid, np.clip(1.0 - dist / float(gate), 0.0, 1.0), 0.0)
-        ch1 = np.where(valid, np.clip(1.0 - (cost - 0.05), 0.0, 1.0), 0.0)
-        chans += [ch0, ch1]
-        names += ["路径距离场", "openness 走廊响应"]
+        if "dist" not in drop:
+            chans.append(np.where(valid, np.clip(1.0 - dist / float(gate), 0.0, 1.0), 0.0))
+            names.append("路径距离场")
+        if "openness" not in drop:
+            chans.append(np.where(valid, np.clip(1.0 - (cost - 0.05), 0.0, 1.0), 0.0))
+            names.append("openness 走廊响应")
+    if not chans:
+        raise ValueError("所有输入通道都被 drop 掉了")
     if tpi is not None:
         # 多尺度地形位置指数（30 m）：路堑/切坡 → TPI 显著为负
         v = tpi[valid]
@@ -316,6 +331,18 @@ def build_inputs(hs, cssc, valid, dist, cost, in_ch, gate=3.0, log=print, tpi=No
     X = np.stack(chans, axis=0)
     log(f"  模型输入 {X.shape}（{X.shape[0]}ch：" + " + ".join(names) + "）")
     return X, cmax
+
+
+def curv_map(dem, valid, sigma=1.5):
+    """凹地形响应：DEM 的拉普拉斯（路槽为凹，取正值），归一化到 [0,1]。"""
+    from scipy.ndimage import gaussian_filter, laplace
+    med = float(np.nanmedian(dem[valid]))
+    z = gaussian_filter(np.where(valid, dem, med), sigma)
+    k = np.where(valid, laplace(z), np.nan)
+    v = k[valid]
+    lo, hi = np.percentile(v, [2.0, 98.0])
+    out = np.where(valid, np.clip((k - lo) / max(hi - lo, 1e-9), 0, 1), 0.0)
+    return out.astype(np.float32)
 
 
 def cold_train(site, X, pseudo, valid, a, log=print):
@@ -552,7 +579,11 @@ def run_site(site, a, log):
         _zs = _gf(dem_f, 1.0)
         tpi = _zs - _uf(_zs, 31, mode="nearest")       # 30 m 窗口 TPI
         log(f"  TPI30 = 1m DEM − 30m 均值：{np.nanmin(tpi):.2f} ~ {np.nanmax(tpi):.2f} m")
-    X, cmax = build_inputs(hs, cssc, valid, dist, cost, a.in_ch, a.gate, log, tpi=tpi)
+    drop = {s.strip() for s in str(a.drop).split(",") if s.strip()}
+    curv = curv_map(dem_f, valid) if a.cssc_mode == "curv" else None
+    X, cmax = build_inputs(hs, cssc, valid, dist, cost, a.in_ch, a.gate, log, tpi=tpi,
+                           drop=drop, cssc_alt=curv,
+                           cssc_name="曲率" if curv is not None else "CSSC")
     net, hist, npar, ckpt = cold_train(site, X, pseudo, valid, a, log)
     prob = infer(net, X, valid, a.device, log=log)
 
@@ -697,6 +728,10 @@ def main():
                    help="模型输入通道数：2=Hillshade+CSSC（局部）；4=再加路径距离场与 openness")
     p.add_argument("--tag", type=str, default="",
                    help="输出文件后缀，用于同站多版本对照（如 --tag _2ch）")
+    p.add_argument("--drop", type=str, default="",
+                   help="通道消融：逗号分隔，可含 hillshade / cssc / dist / openness")
+    p.add_argument("--cssc-mode", choices=("cssc", "curv"), default="cssc",
+                   help="横断面特征：cssc=符号交替次数；curv=拉普拉斯曲率（对照）")
     a = p.parse_args()
 
     os.makedirs(RES, exist_ok=True)

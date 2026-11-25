@@ -98,6 +98,27 @@ Reported values (fair point-level protocol, `d3 = 3.5 m`, `AGL = 2.0 m`):
 
 Per-site metrics are reported side by side; they are **not** compared across sites, because the two reference corridors differ in width (median 4.47 m vs 7.21 m) and IoU is systematically more lenient for wider references.
 
+## Input-channel ablation
+
+`--drop` removes individual terrain channels from Branch B; `--cssc-mode curv`
+replaces the cross-section sign-change count (CSSC) with a Laplacian-curvature
+channel for control. Endpoints must match the main runs.
+
+```bash
+python tools/cold_start_transfer.py --site 杨家坝 --gate 3 --tag _abl_noCSSC \
+    --drop cssc --ep "139,283;495,133"
+python tools/eval_freeaxis.py --site 杨家坝 --axis skel \
+    --npz cold_start_杨家坝_abl_noCSSC.npz --dist3 3.5 --agl 2 --truth old \
+    --out eval_abl_noCSSC
+```
+
+Variants: `--drop hillshade`, `--drop cssc`, `--drop openness`, `--drop hillshade,cssc,openness`
+and `--cssc-mode curv`. Across both sites every single-channel change alters the
+fair IoU by at most 0.012, and CSSC is indistinguishable from curvature
+(+0.003 / −0.001), i.e. the gain comes from the Branch-A distance field rather
+than from any individual local descriptor.
+
+
 ## Tests
 
 ```bash

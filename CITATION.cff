@@ -13,8 +13,8 @@ authors:
   - family-names: Wang
     given-names: Shunli
     affiliation: "School of Remote Sensing and Information Engineering, Wuhan University, Wuhan 430079, China"
-version: 1.0.0
-date-released: 2026-11-24
+version: 1.1.0
+date-released: 2026-11-25
 license: MIT
 repository-code: "https://github.com/demonlover-coder/shudao-lidar-archaeology"
 keywords:
